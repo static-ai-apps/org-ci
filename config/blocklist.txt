@@ -1,0 +1,18 @@
+# Hosts whose use blocks a merge (SPEC.md §6). One per line; subdomains match too.
+# A starter list of in-browser cryptomining services. Extend it as the arms race requires;
+# public lists of malware and phishing domains are a good source.
+coinhive.com
+coin-hive.com
+authedmine.com
+cnhv.co
+crypto-loot.com
+cryptoloot.pro
+webminepool.com
+jsecoin.com
+coinimp.com
+minero.cc
+webmine.cz
+monerominer.rocks
+ppoi.org
+coinhave.com
+minr.pw

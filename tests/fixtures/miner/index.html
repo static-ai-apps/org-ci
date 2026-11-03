@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixture miner</title>
+</head>
+<body>
+<h1>Fixture miner</h1>
+<script>
+const w = new Worker(URL.createObjectURL(new Blob(['let x=0; for(;;){x+=Math.sqrt(x+1)}'],{type:'text/javascript'}))); for (let i=0;i<2;i++){ new Worker(URL.createObjectURL(new Blob(['let y=0; for(;;){y++}'],{type:'text/javascript'}))); }
+</script>
+</body>
+</html>

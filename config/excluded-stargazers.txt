@@ -1,0 +1,3 @@
+# Accounts whose stars never count toward Q (GOVERNANCE.md §6.1), one login per line.
+# Org members, outside collaborators and the agents' App identities are excluded automatically;
+# list anything else here.

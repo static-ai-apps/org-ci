@@ -1,0 +1,74 @@
+{
+  "org": "static-ai-apps",
+  "site_name": "Static AI Apps",
+  "template_repo": "app-template",
+  "library_repo": "static-ai-apps.github.io",
+  "alerts_repo": "alerts",
+  "ci_repo": "org-ci",
+  "reserved_names": [
+    ".github",
+    "admin",
+    "alerts",
+    "api",
+    "app-template",
+    "assets",
+    "hello-world",
+    "index",
+    "library",
+    "org-ci",
+    "static",
+    "www"
+  ],
+  "identities": {
+    "ic": "static-ai-apps-ic[bot]",
+    "curator": "static-ai-apps-curator[bot]",
+    "ci": "static-ai-apps-ci[bot]"
+  },
+  "whitelist": {
+    "README.md": {
+      "required": true,
+      "max_bytes": 65536
+    },
+    "index.html": {
+      "required": true,
+      "max_bytes": 1048576
+    },
+    "LICENSE": {
+      "required": true,
+      "max_bytes": 16384
+    },
+    "sw.js": {
+      "required": false,
+      "max_bytes": 65536
+    },
+    "manifest.webmanifest": {
+      "required": false,
+      "max_bytes": 16384
+    },
+    "icon.png": {
+      "required": false,
+      "max_bytes": 262144
+    },
+    "NOTES.md": {
+      "required": false,
+      "max_bytes": 65536
+    },
+    "ROADMAP.md": {
+      "required": false,
+      "max_bytes": 65536
+    },
+    "CHANGELOG.md": {
+      "required": false,
+      "max_bytes": 65536
+    }
+  },
+  "max_tree_bytes": 1572864,
+  "detectors": {
+    "settle_seconds": 5,
+    "idle_seconds": 45,
+    "cpu_block_cores": 0.5,
+    "cpu_alert_cores": 0.25,
+    "max_external_hosts": 15,
+    "max_idle_requests": 100
+  }
+}

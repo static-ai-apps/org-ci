@@ -1,0 +1,133 @@
+# Validate and merge pull requests on published repos (SPEC.md §3–6).
+#
+# discover  finds open pull requests (read-only)
+# validate  checks each one in an isolated job with no secrets: it runs untrusted code
+# act       the only job with the CI App's credentials: comments, merges, alerts, closes strangers' PRs
+name: pipeline
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "Only check pull requests on this published repo (the launcher sets this after a session)"
+        required: false
+        default: ""
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      matrix: ${{ steps.d.outputs.matrix }}
+      count: ${{ steps.d.outputs.count }}
+      foreign: ${{ steps.d.outputs.foreign }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - id: d
+        run: python scripts/discover.py
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ONLY_REPO: ${{ inputs.repo }}
+
+  validate:
+    needs: discover
+    if: needs.discover.outputs.count != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include: ${{ fromJSON(needs.discover.outputs.matrix) }}
+    steps:
+      - name: Check out org-ci
+        uses: actions/checkout@v4
+        with:
+          path: ci
+      - name: Check out the published version
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/${{ matrix.repo }}
+          ref: main
+          path: base
+          persist-credentials: false
+      - name: Check out the proposed version
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.head_repo }}
+          ref: ${{ matrix.head_sha }}
+          path: pr
+          persist-credentials: false
+      - name: Check out the template's LICENSE
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/app-template
+          ref: main
+          path: template
+          sparse-checkout: LICENSE
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install tools
+        run: |
+          pip install pyyaml psutil playwright
+          python -m playwright install --with-deps chromium
+      - name: Validate
+        run: >
+          python ci/scripts/validate.py --repo "$REPO" --number "$NUMBER" --head-sha "$SHA"
+          --pr-dir pr --base-dir base --license template/LICENSE --out result.json
+        env:
+          REPO: ${{ matrix.repo }}
+          NUMBER: ${{ matrix.number }}
+          SHA: ${{ matrix.head_sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: result-${{ matrix.repo }}-${{ matrix.number }}
+          path: result.json
+          retention-days: 7
+
+  act:
+    needs: [discover, validate]
+    if: >
+      always() && needs.discover.result == 'success' &&
+      (needs.discover.outputs.count != '0' || needs.discover.outputs.foreign != '[]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - id: token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: result-*
+          path: results
+      - run: python scripts/act.py
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          MATRIX: ${{ needs.discover.outputs.matrix }}
+          FOREIGN: ${{ needs.discover.outputs.foreign }}
+          RESULTS_DIR: results
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}

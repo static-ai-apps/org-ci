@@ -1,0 +1,42 @@
+# Create a repository pair for a new app. Dispatched by the launcher on the curator's `create` request.
+name: create-app
+
+on:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: "App name: lowercase letters, digits and hyphens"
+        required: true
+      pitch:
+        description: "The curator's pitch; becomes the app's first ROADMAP.md"
+        required: true
+
+concurrency:
+  group: create-app
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - id: token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      # Inputs reach the script only through the environment, never pasted into shell.
+      - run: python scripts/create_app.py
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          NAME: ${{ inputs.name }}
+          PITCH: ${{ inputs.pitch }}

@@ -1,0 +1,34 @@
+{
+  "good": {
+    "blocks": 0,
+    "alerts": 0,
+    "warns": 0
+  },
+  "miner": {
+    "blocks": 1,
+    "block_contains": "CPU"
+  },
+  "blocked-host": {
+    "blocks": 1,
+    "block_contains": "blocked host"
+  },
+  "sockets": {
+    "blocks": 0,
+    "alerts_min": 3
+  },
+  "crash": {
+    "blocks": 1,
+    "block_contains": "uncaught error"
+  },
+  "wide": {
+    "blocks": 0,
+    "warns_contains": "320"
+  },
+  "bad-files": {
+    "blocks": 3
+  },
+  "ld-bad": {
+    "blocks": 3,
+    "warns_contains": "softwareVersion"
+  }
+}

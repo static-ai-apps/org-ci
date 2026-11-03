@@ -1,0 +1,32 @@
+# Daily: forward `Needs human` notes and Safe Browsing verdicts to the private alerts repo (GOVERNANCE.md §10).
+name: alerts
+
+on:
+  schedule:
+    - cron: "41 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  alerts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - id: token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - run: python scripts/alerts.py
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          SAFE_BROWSING_API_KEY: ${{ secrets.SAFE_BROWSING_API_KEY }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}

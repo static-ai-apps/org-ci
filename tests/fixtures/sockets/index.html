@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixture sockets</title>
+</head>
+<body>
+<h1>Fixture sockets</h1>
+<script>
+try { new WebSocket('wss://socket.example.invalid/'); } catch (e) {} try { new RTCPeerConnection(); } catch (e) {} eval('1+1');
+</script>
+</body>
+</html>
