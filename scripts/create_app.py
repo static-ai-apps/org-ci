@@ -26,13 +26,20 @@ PUBLISHED_SETTINGS = {
 WORKSPACE_SETTINGS = {"has_issues": False, "has_wiki": False, "has_projects": False, "has_discussions": False}
 
 
-def wait_for(path, token, tries=30):
+def wait_for(path, token, tries=60):
+    """Poll until a newly created repo has content. GitHub fills template copies and forks in the
+    background: until then the repo answers 404 (not there yet) or 409 (there, but still empty)."""
     for _ in range(tries):
-        r = gh("GET", path, token=token, ok404=True)
+        try:
+            r = gh("GET", path, token=token, ok404=True)
+        except GitHubError as e:
+            if e.status != 409:
+                raise
+            r = None
         if r:
             return r
-        time.sleep(2)
-    raise RuntimeError(f"timed out waiting for {path}")
+        time.sleep(3)
+    raise RuntimeError(f"timed out after {tries * 3} seconds waiting for {path}")
 
 
 def roadmap(name, pitch):
