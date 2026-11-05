@@ -85,9 +85,12 @@ def org_repos(token=None):
 
 def managed_repos(repos):
     """Published repos CI manages: every repo with a workspace pair (`name` and `.name`), not archived.
-    The template, org-ci, alerts and anything else without a workspace are left alone."""
+    Reserved names are never apps, even with a pair: governance has its `.governance` fork, and CI must
+    leave both alone. The template, org-ci and anything else without a workspace are left alone too."""
     names = {r["name"] for r in repos}
-    return [r for r in repos if not r["name"].startswith(".") and f".{r['name']}" in names and not r.get("archived")]
+    reserved = set(CONFIG["reserved_names"])
+    return [r for r in repos if not r["name"].startswith(".") and f".{r['name']}" in names
+            and r["name"] not in reserved and not r.get("archived")]
 
 
 def workspace_of(repo_name):

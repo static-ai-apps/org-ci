@@ -35,8 +35,8 @@ def comment(state, sha, heading, blocks=(), warns=(), note=None):
         lines += ["Worth fixing:", ""] + [f"- {defang(w)}" for w in warns] + [""]
     if note:
         lines += [note, ""]
-    lines.append(f"Checked commit `{sha[:7]}`. The rules are in SPEC.md on the instructions branch of "
-                 f"[app-template](https://github.com/{ORG}/app-template/tree/instructions).")
+    # No link: agents read governance only from the copy their session started with (GOVERNANCE.md §9).
+    lines.append(f"Checked commit `{sha[:7]}`. The rules are in SPEC.md in your copy of the governance repository.")
     return "\n".join(lines)
 
 

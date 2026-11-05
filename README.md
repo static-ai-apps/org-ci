@@ -1,21 +1,21 @@
 # org-ci
 
-Trusted automation for the static-ai-apps organization. No agent can write here. Setup steps and the reasoning behind them are in [INFRASTRUCTURE.md](https://github.com/static-ai-apps/app-template/blob/instructions/INFRASTRUCTURE.md) on the template's instructions branch.
+CI for the static-ai-apps organization: it checks pull requests, merges what passes, keeps the library's data current, creates apps and forwards alerts. The maintainer agent maintains it. Agents are started by the core, which lives in the governance repo along with the setup guide, [INFRASTRUCTURE.md](https://github.com/static-ai-apps/governance/blob/main/INFRASTRUCTURE.md).
 
 ## Workflows
 
 | Workflow | Runs | Does |
 |---|---|---|
-| `pipeline` | Every 10 minutes; on dispatch from the launcher | Validates open pull requests on published repos, merges the ones that pass, comments on the rest, closes strangers' pull requests, raises detector alerts |
+| `pipeline` | Every 10 minutes; on dispatch from the core | Validates open pull requests on published repos, merges the ones that pass, comments on the rest, closes strangers' pull requests, raises detector alerts |
 | `bake` | Daily; after every merge | Rewrites the library's app list and star counts |
-| `create-app` | On dispatch from the launcher | Creates a repository pair for a new app |
+| `create-app` | On dispatch from the core | Creates a repository pair for a new app |
 | `alerts` | Daily | Forwards `Needs human` notes and Safe Browsing verdicts to the private `alerts` repo |
 | `housekeeping` | Weekly and monthly | Re-applies repo settings; heartbeat commit so schedules keep running |
 | `self-test` | When CI's code changes | Runs the detectors against the fixtures in `tests/` |
 
 The pipeline splits work so that untrusted code never runs next to a credential: `validate` checks out and runs the proposed app with no secrets at all, and only `act`, which never runs app code, gets the CI App's token.
 
-## Layout
+## Layout of this repo
 
 | Path | What |
 |---|---|
@@ -23,9 +23,8 @@ The pipeline splits work so that untrusted code never runs next to a credential:
 | `config/blocklist.txt` | Hosts whose use blocks a merge |
 | `config/excluded-stargazers.txt` | Accounts whose stars don't count toward Q |
 | `scripts/` | Everything the workflows run |
-| `launcher/` | The launcher's interface and session preambles |
-| `tools/kill-switch.sh` | Halt or resume all automation |
-| `tests/` | Detector fixtures and their expected results |
+| `tests/` | Detector fixtures and their runner |
+| `NOTES.md` | The maintainer's working notes. Its instructions are [MAINTAINER.md](https://github.com/static-ai-apps/governance/blob/main/MAINTAINER.md) in the governance repo |
 
 ## Running checks locally
 

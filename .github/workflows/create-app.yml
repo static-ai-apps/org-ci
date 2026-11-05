@@ -1,4 +1,4 @@
-# Create a repository pair for a new app. Dispatched by the launcher on the curator's `create` request.
+# Create a repository pair for a new app. Dispatched by the core on the curator's `create` request.
 name: create-app
 
 on:
